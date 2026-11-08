@@ -1,0 +1,461 @@
+:root {
+  --night: #21272c;
+  --rust: #70291f;
+  --brick: #a3462c;
+  --gold: #dcab6c;
+  --pale: #edc18b;
+  --paper: #e7bf82;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #21272c;
+  color: var(--pale);
+  font-family: Georgia, 'Times New Roman', serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; }
+#stage {
+  position: relative;
+  aspect-ratio: 941 / 1672;
+  width: min(100vw, 56.2799dvh);
+  height: auto;
+  max-height: 100dvh;
+  overflow: hidden;
+  isolation: isolate;
+  background-image: url('assets/rooftop.webp');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 100% 100%;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  cursor: default;
+}
+/* Cover and gameplay use the same portrait viewport, so the start transition never jumps. */
+#stage.cover-mode { aspect-ratio: 941 / 1672; width: min(100vw, 56.2799dvh); }
+#stage.playing { cursor: none; }
+#field, #effects { position: absolute; inset: 0; pointer-events: none; }
+#field { z-index: 3; }
+#effects { z-index: 7; }
+#hud {
+  position: absolute;
+  z-index: 8;
+  top: 4.9%;
+  left: 10%;
+  right: 10%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  text-shadow: 0 2px 8px #21272ca8;
+  opacity: 0;
+  transition: opacity .28s ease;
+}
+#stage.playing #hud { opacity: 1; }
+.stat { display: flex; flex-direction: column; align-items: flex-start; gap: 3px; }
+.stat:last-child { text-align: right; align-items: flex-end; }
+.stat-label {
+  color: #d9ab71;
+  letter-spacing: .19em;
+  font-size: clamp(8px, 1.2vw, 11px);
+  font-weight: normal;
+}
+.stat-number {
+  color: #edc18b;
+  font-size: clamp(24px, 4.65vw, 42px);
+  font-weight: normal;
+  line-height: 1;
+  letter-spacing: -.045em;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+#time.low { color: #f0a16a; }
+#igniter {
+  position: absolute;
+  z-index: 9;
+  pointer-events: none;
+  top: 0;
+  left: 0;
+  visibility: hidden;
+  will-change: transform;
+  transform-origin: top left;
+}
+#igniter img, .firework img { display: block; position: absolute; max-width: none; pointer-events: none; user-select: none; -webkit-user-select: none; }
+.firework {
+  position: absolute;
+  top: 0;
+  left: 0;
+  will-change: transform;
+  pointer-events: none;
+  transform-origin: center;
+  contain: layout style;
+  overflow: hidden;
+}
+.burst {
+  position: absolute;
+  left: 0;
+  top: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+.burst img { display: block; width: 100%; height: 100%; }
+.plus-score {
+  position: absolute;
+  pointer-events: none;
+  color: #f4c37b;
+  font-size: clamp(16px, 3.4vw, 27px);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 2px 3px #3c201e;
+  animation: rise .9s ease-out both;
+}
+@keyframes rise {
+  0% { opacity: 0; transform: translate(-50%, 6px) scale(.92); }
+  17% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -64px) scale(1.05); }
+}
+.screen {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  text-align: center;
+  opacity: 1;
+  transition: opacity .33s ease;
+}
+.screen.hidden { opacity: 0; pointer-events: none; visibility: hidden; }
+#intro { background: url('assets/cover.webp') center center / cover no-repeat; }
+.screen-inner {
+  position: absolute;
+  top: 34%;
+  left: 8%;
+  width: 84%;
+}
+.kicker {
+  margin: 0 0 15px;
+  font-size: clamp(9px, 1.32vw, 12px);
+  letter-spacing: .31em;
+  color: var(--gold);
+  text-shadow: 0 2px 7px #151b1d;
+}
+h1 {
+  margin: 0;
+  font-family: 'Noto Serif Devanagari', 'Nirmala UI', 'Kohinoor Devanagari', Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(39px, 7.3vw, 70px);
+  line-height: 1.28;
+  letter-spacing: -.025em;
+  color: #f0c187;
+  text-shadow: 0 2px 0 #713f28, 0 6px 20px #0e1518;
+}
+.intro-line {
+  margin: 14px 0 0;
+  color: #e3b781;
+  font-size: clamp(12px, 1.85vw, 16px);
+  font-style: italic;
+  line-height: 1.5;
+  text-shadow: 0 2px 8px #11191c;
+}
+#start-controls {
+  position: absolute;
+  bottom: max(5%, env(safe-area-inset-bottom));
+  left: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#slide-track {
+  position: relative;
+  width: min(76%, 390px);
+  height: clamp(52px, 6.4dvh, 64px);
+  border: 1px solid #d29b5e;
+  border-radius: 999px;
+  background: #673024ec;
+  box-shadow: inset 0 0 0 3px #452725, 0 5px 24px #181e20a8;
+  touch-action: none;
+  cursor: grab;
+  outline-offset: 5px;
+}
+#slide-track:active { cursor: grabbing; }
+#slide-track:focus-visible { outline: 2px solid #f2c68f; }
+#slide-label {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  font-family: 'Cabinet Grotesk', 'Avenir Next', 'Trebuchet MS', sans-serif;
+  font-weight: 700;
+  font-size: clamp(11px, 1.3vw + 6px, 14px);
+  line-height: 1;
+  color: #eac18a;
+  letter-spacing: .1em;
+  white-space: nowrap;
+  text-align: center;
+}
+#slide-thumb {
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  bottom: 5px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1px solid #f1bf7c;
+  background: #ad4e2c;
+  box-shadow: inset 0 0 0 2px #79371f, 2px 0 9px #341b18;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f4c681;
+  transform: translateX(0);
+  pointer-events: none;
+}
+#slide-thumb.snap { transition: transform .24s ease; }
+#slide-thumb .sparkle { display: block; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 53%; height: 53%; }
+.instruction {
+  font-size: clamp(9px, 1.25vw, 12px);
+  letter-spacing: .12em;
+  line-height: 1.7;
+  color: #dfac70;
+  margin: 17px 0 0;
+  text-shadow: 0 2px 8px #161b1d;
+}
+/* Score poster uses the user's exact vintage reference art. The mutable
+   numbers, name, still and tagline are HTML, so the score is never baked in. */
+#gameover {
+  background: #e9b879 url('assets/score-poster.webp') center center / cover no-repeat;
+  color: #76281f;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .32s ease;
+}
+#gameover.visible { visibility: visible; opacity: 1; pointer-events: auto; }
+.poster-fit {
+  position: absolute;
+  top: 0; left: 0;
+  width: 1086px;
+  height: 1448px;
+  transform-origin: top left;
+  pointer-events: none;
+}
+.poster-score {
+  display: flex;
+  position: absolute;
+  top: 290px; left: 347px;
+  width: 390px; height: 133px;
+  align-items: center;
+  justify-content: center;
+  font-family: Georgia, 'Times New Roman', serif;
+  color: #7b291f;
+  font-weight: 800;
+  font-size: 123px;
+  letter-spacing: -.065em;
+  line-height: 1;
+  font-variant-numeric: lining-nums tabular-nums;
+  white-space: nowrap;
+}
+#result-art {
+  position: absolute;
+  left: 311px; top: 469px;
+  width: 464px; height: 321px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: visible;
+}
+#result-art img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 9px 14px rgba(0,0,0,.15));
+}
+#result-art[data-kind="phuljhari"] img { width: 97%; transform: scale(1.08); }
+#result-art[data-kind="anaar"] img { height: 90%; transform: scale(1.08); }
+#result-art[data-kind="chakri"] img { width: 102%; transform: scale(1.02); }
+#result-art[data-kind="rocket"] img { height: 97%; transform: scale(1.06); }
+#result-art[data-kind="sutli"] img { height: 93%; transform: scale(1.08); }
+.poster-prefix {
+  position: absolute;
+  left: 379px; top: 832px;
+  width: 327px; height: 55px;
+  display: flex; align-items: center; justify-content: center;
+  color: #efcda0;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 37px; font-weight: 700; letter-spacing: .11em;
+  line-height: 1;
+  text-shadow: 0 1px 1px #66271c;
+  white-space: nowrap;
+}
+.poster-name {
+  position: absolute;
+  top: 881px; left: 276px;
+  width: 532px; height: 89px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f4d5a8;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 900;
+  font-size: 72px;
+  letter-spacing: -.045em;
+  line-height: 1;
+  white-space: nowrap;
+  text-shadow: 0 1px 0 #8c3c28;
+}
+.poster-tagline {
+  position: absolute;
+  top: 995px; left: 237px;
+  width: 612px; height: 59px;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #633026;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 35px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+.poster-hotspot {
+  position: absolute;
+  display: block;
+  margin: 0;
+  border: 0;
+  border-radius: 30px;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+  pointer-events: auto;
+}
+.poster-hotspot:hover { background: rgba(121, 42, 27, .07); }
+.poster-hotspot:focus-visible { outline: 5px solid #7a2b24; outline-offset: 2px; }
+#home { left: 215px; top: 1122px; width: 137px; height: 104px; }
+#again { left: 379px; top: 1122px; width: 464px; height: 104px; }
+/* Single-pass original ignition GIF (loop metadata removed, frames unchanged). */
+#ignition-transition {
+  position: absolute;
+  z-index: 22;
+  inset: 0;
+  background: #000;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .22s ease, visibility .22s ease;
+}
+#ignition-transition.visible { opacity: 1; visibility: visible; }
+#ignition-animation {
+  position: absolute;
+  display: block;
+  width: 96%;
+  height: auto;
+  bottom: 1%;
+  object-fit: contain;
+}
+/* The blast is clipped to the portrait game viewport, never to the desktop screen. */
+#end-blast {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  display: none;
+  overflow: hidden;
+  pointer-events: none;
+  background: #000;
+  align-items: center;
+  justify-content: center;
+}
+#end-blast.visible { display: flex; }
+#end-blast img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  flex: 0 0 auto;
+  object-fit: cover;
+}
+.end-reason {
+  font-size: clamp(9px, 1.45vw, 13px);
+  letter-spacing: .18em;
+  color: var(--gold);
+  margin: 16px 0 0;
+}
+
+@media (max-width: 600px) {
+  .stat-label { font-size: 8px; }
+  #slide-label { font-size: 12px; }
+  .kicker { font-size: 9px; }
+  .instruction { font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .screen, #hud { transition: none; }
+}
+
+/* Actual phone canvas: fill the entire visible viewport, no top/bottom letterboxing. */
+@media (max-width: 700px) {
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body { display: block; }
+  #stage,
+  #stage.cover-mode {
+    width: 100vw;
+    height: 100vh; /* fallback */
+    height: 100dvh;
+    max-height: none;
+    aspect-ratio: auto;
+    border-radius: 0;
+  }
+  #intro { background-position: center center; background-size: cover; }
+  #slide-track { width: min(78%, 390px); }
+  #slide-label { font-size: clamp(11px, 3.1vw, 14px); letter-spacing: .085em; }
+  #ignition-animation { bottom: max(1%, env(safe-area-inset-bottom)); }
+}
+
+/* Small, vintage-toned music control. A music-off choice does not mute SFX. */
+#music-toggle {
+  position: absolute;
+  z-index: 35;
+  top: max(1.4%, env(safe-area-inset-top));
+  right: 2.6%;
+  width: clamp(34px, 9vw, 40px);
+  height: clamp(34px, 9vw, 40px);
+  padding: 7px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(236, 184, 116, .65);
+  border-radius: 50%;
+  background: rgba(42, 30, 29, .7);
+  color: #edc18b;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .18s ease, opacity .18s ease;
+}
+#music-toggle:hover { background: rgba(106, 45, 32, .9); }
+#music-toggle:focus-visible { outline: 2px solid #edc18b; outline-offset: 3px; }
+#music-toggle svg { width: 100%; height: 100%; display: block; }
+#music-toggle .music-off-icon { display: none; }
+#music-toggle[aria-pressed="false"] .music-on-icon { display: none; }
+#music-toggle[aria-pressed="false"] .music-off-icon { display: block; }
+#stage.igniting #music-toggle, #stage.exploding #music-toggle {
+  opacity: 0;
+  pointer-events: none;
+}
+/* Keep the poster's top-right ornament unobstructed; control is still reachable. */
+#stage:has(#gameover.visible) #music-toggle {
+  background: rgba(106, 45, 32, .96);
+  border-color: #e8ba7a;
+}
+@media (max-width: 700px) {
+  #music-toggle { top: calc(max(12px, env(safe-area-inset-top)) + 2px); right: 12px; }
+}
